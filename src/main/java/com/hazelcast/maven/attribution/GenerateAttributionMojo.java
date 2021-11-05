@@ -14,7 +14,7 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
  * Generates the attribution file for a single project.
  */
 @Mojo(name = "generate", defaultPhase = LifecyclePhase.PACKAGE, requiresDependencyResolution = ResolutionScope.RUNTIME)
-public class AttributionMojo extends AbstractAttributionMojo {
+public class GenerateAttributionMojo extends AbstractAttributionMojo {
 
     @Override
     protected Map<String, File> resolveSourceJars() {

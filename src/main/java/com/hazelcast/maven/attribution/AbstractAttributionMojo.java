@@ -179,7 +179,7 @@ public abstract class AbstractAttributionMojo extends AbstractMojo {
                     }
                     pw.println();
                 } else {
-                    getLog().info("Skipping " + gav + " as no attribution was found there.");
+                    getLog().debug("Skipping " + gav + " as no attribution was found there.");
                 }
             }
         } catch (FileNotFoundException e) {
@@ -270,7 +270,7 @@ public abstract class AbstractAttributionMojo extends AbstractMojo {
         try {
             resolvedArtifact = resolverComponent.getResolver().resolveArtifact(getProjectBuildingRequest(project), artifact)
                     .getArtifact();
-            getLog().info(" > resolved " + resolvedArtifact.getFile());
+            getLog().debug("Resolved source jar: " + resolvedArtifact.getFile());
         } catch (ArtifactResolverException e1) {
             getLog().info("Resolving failed for " + artifact);
         }

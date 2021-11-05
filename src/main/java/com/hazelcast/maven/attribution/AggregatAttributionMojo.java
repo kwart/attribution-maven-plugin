@@ -17,7 +17,7 @@ import org.apache.maven.project.MavenProject;
  * Generates an aggregated attribution file for a (possibly) multi-module project.
  */
 @Mojo(name = "aggregate", defaultPhase = LifecyclePhase.PACKAGE, aggregator = true, requiresDependencyResolution = ResolutionScope.RUNTIME)
-public class AggregatorMojo extends AbstractAttributionMojo {
+public class AggregatAttributionMojo extends AbstractAttributionMojo {
 
     @Override
     protected Map<String, File> resolveSourceJars() {
@@ -37,7 +37,7 @@ public class AggregatorMojo extends AbstractAttributionMojo {
             getLog().info("Null reactorProjects");
         }
         getLog().debug("Project GAs: " + projectGaSet);
-        getLog().info("Artifacts size: " + artifacts.size());
+        getLog().debug("Artifacts size: " + artifacts.size());
 
         Map<String, File> result = new HashMap<String, File>();
         for (Artifact artifact : artifacts) {

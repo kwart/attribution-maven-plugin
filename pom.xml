@@ -8,7 +8,8 @@
     <packaging>maven-plugin</packaging>
     <version>1.0-SNAPSHOT</version>
 
-    <name>Maven Mojo for generating the attribution file.</name>
+    <name>attribution-maven-plugin</name>
+    <description>Maven Mojo for generating an attribution text file from project dependencies.</description>
     <url>https://github.com/hazelcast/attribution-maven-plugin/</url>
 
     <properties>

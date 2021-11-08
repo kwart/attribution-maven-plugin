@@ -45,16 +45,13 @@ import org.apache.maven.shared.transfer.artifact.resolve.ArtifactResolverExcepti
 
 public abstract class AbstractAttributionMojo extends AbstractMojo {
 
-    public static final String DEFAULT_COPYRIGHT_PATTERN = "(?i)^([\\s/*]*)(((\\(c\\))|(copyright))\\s+\\S[^;{}]*)$";
-    public static final int DEFAULT_COPYRIGHT_PATTERN_GRPIDX = 2;
+    protected static final String DEFAULT_COPYRIGHT_PATTERN = "(?i)^([\\s/*]*)(((\\(c\\))|(copyright))\\s+\\S[^;{}]*)$";
+    protected static final int DEFAULT_COPYRIGHT_PATTERN_GRPIDX = 2;
 
     /**
      * The classifier for sources.
      */
-    public static final String SOURCES_CLASSIFIER = "sources";
-
-    @Component
-    private ResolverComponent resolverComponent;
+    protected static final String SOURCES_CLASSIFIER = "sources";
 
     @Parameter(defaultValue = "${session}", readonly = true, required = true)
     protected MavenSession session;
@@ -86,29 +83,49 @@ public abstract class AbstractAttributionMojo extends AbstractMojo {
      * @see #DEFAULT_COPYRIGHT_PATTERN
      */
     @Parameter(property = "attribution.copyrightPattern", defaultValue = "")
-    protected String copyrightPattern;
+    protected volatile String copyrightPattern;
 
     /**
      * When the {@link #copyrightPattern} is configured, then this parameter allows to specify which capture group is used. By
      * default the whole pattern is used (group==0) when custom pattern is configured.
-     * 
+     *
      * @see #copyrightPattern
      * @see #DEFAULT_COPYRIGHT_PATTERN_GRPIDX
      */
     @Parameter(property = "attribution.copyrightPatternGroupIndex", defaultValue = "0")
-    protected int copyrightPatternGroupIndex;
+    protected volatile int copyrightPatternGroupIndex;
 
     /**
      * Maximal wait time for finishing reading source JARs and searching for patterns in the found source files.
      */
     @Parameter(property = "attribution.serviceTimeoutMinutes", defaultValue = "60")
-    private int serviceTimeoutMinutes;
+    protected int serviceTimeoutMinutes;
 
     /**
      * Specifies the destination attribution file.
      */
     @Parameter(property = "attribution.outputFile", defaultValue = "${project.build.directory}/attribution.txt", required = true)
     protected File outputFile;
+
+    /**
+     * Parameter which can specify a file in which exclusion patterns are listed. File should be in UTF-8 with a one pattern per
+     * line.
+     *
+     * @see #exclusionPatterns
+     */
+    @Parameter(property = "attribution.exclusionPatternsFile")
+    protected File exclusionPatternsFile;
+
+    /**
+     * Specifies copyright exclusion patterns.
+     *
+     * @see #exclusionPatternsFile
+     */
+    @Parameter
+    protected List<String> exclusionPatterns;
+
+    @Component
+    private ResolverComponent resolverComponent;
 
     public void execute() throws MojoExecutionException, MojoFailureException {
         if (skip) {
@@ -127,11 +144,13 @@ public abstract class AbstractAttributionMojo extends AbstractMojo {
             }
         }
 
+        final AttributionContext context = new AttributionContext();
+        prepareExclusionPatterns(context);
+
         Map<String, File> sourceJars = resolveSourceJars();
 
         int threads = parallelism > 0 ? parallelism : Runtime.getRuntime().availableProcessors();
         ExecutorService jarReaderService = Executors.newFixedThreadPool(threads);
-        final AttributionContext context = new AttributionContext();
         for (Map.Entry<String, File> entry : sourceJars.entrySet()) {
             jarReaderService.submit(() -> readJar(entry.getKey(), entry.getValue(), context));
         }
@@ -156,7 +175,34 @@ public abstract class AbstractAttributionMojo extends AbstractMojo {
             throw new MojoFailureException("Source files processing has timed out", e);
         }
 
-        generateResults(context);
+        if (context.foundAttribution.isEmpty()) {
+            getLog().info("No attribution found in the dependencies. The output file will not be generated.");
+        } else {
+            generateResults(context);
+        }
+    }
+
+    private void prepareExclusionPatterns(final AttributionContext context) throws MojoExecutionException {
+        if (exclusionPatterns != null && !exclusionPatterns.isEmpty()) {
+            context.exclusionPatterns.addAll(exclusionPatterns);
+        }
+
+        if (exclusionPatternsFile != null && exclusionPatternsFile.isFile()) {
+            getLog().debug("Reading exclusionPatternsFile " + exclusionPatternsFile);
+            try (BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(new FileInputStream(exclusionPatternsFile), StandardCharsets.UTF_8))) {
+                String line;
+                while (null != (line = reader.readLine())) {
+                    if (!line.isEmpty()) {
+                        context.exclusionPatterns.add(line);
+                        getLog().debug("Added exclusionPattern '" + line + "'");
+                    }
+                }
+            } catch (IOException e) {
+                throw new MojoExecutionException(
+                        "Failed to read patterns from the exlucsionPatternFile " + exclusionPatternsFile.getAbsolutePath(), e);
+            }
+        }
     }
 
     private void generateResults(final AttributionContext context) throws MojoExecutionException {
@@ -185,6 +231,7 @@ public abstract class AbstractAttributionMojo extends AbstractMojo {
         } catch (FileNotFoundException e) {
             throw new MojoExecutionException("Unable to write to the outputFile " + outputFile, e);
         }
+        getLog().info("Attribution file was generated: " + outputFile.getAbsolutePath());
     }
 
     protected abstract Map<String, File> resolveSourceJars();
@@ -227,8 +274,6 @@ public abstract class AbstractAttributionMojo extends AbstractMojo {
             try {
                 SrcFile srcFile = context.srcQueue.poll(1, TimeUnit.SECONDS);
                 getLog().debug("Processing " + srcFile.getSourceName() + " from " + srcFile.getGav());
-                Set<String> hitSet = context.foundAttribution.computeIfAbsent(srcFile.getGav(),
-                        s -> Collections.newSetFromMap(new ConcurrentSkipListMap<>()));
                 try (BufferedReader reader = new BufferedReader(
                         new InputStreamReader(new ByteArrayInputStream(srcFile.getBytes()), StandardCharsets.UTF_8))) {
                     String line;
@@ -236,6 +281,12 @@ public abstract class AbstractAttributionMojo extends AbstractMojo {
                         Matcher m = pattern.matcher(line);
                         if (m.find()) {
                             String copyrightStr = m.group(group);
+                            if (isExcluded(context, copyrightStr)) {
+                                getLog().debug("Excluded: " + copyrightStr);
+                                continue;
+                            }
+                            Set<String> hitSet = context.foundAttribution.computeIfAbsent(srcFile.getGav(),
+                                    s -> Collections.newSetFromMap(new ConcurrentSkipListMap<>()));
                             if (hitSet.add(copyrightStr)) {
                                 getLog().debug("Found: " + copyrightStr);
                             }
@@ -248,6 +299,16 @@ public abstract class AbstractAttributionMojo extends AbstractMojo {
                 getLog().error(e);
             }
         }
+    }
+
+    private boolean isExcluded(AttributionContext context, String copyrightStr) {
+        for (String patternStr : context.exclusionPatterns) {
+            Pattern p = Pattern.compile(patternStr);
+            if (p.matcher(copyrightStr).find()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static byte[] toByteArray(InputStream in) throws IOException {
@@ -278,6 +339,7 @@ public abstract class AbstractAttributionMojo extends AbstractMojo {
     }
 
     protected Artifact createResourceArtifact(final Artifact artifact, final String classifier) {
+        @SuppressWarnings("deprecation")
         final DefaultArtifact a = (DefaultArtifact) resolverComponent.getArtifactFactory().createArtifactWithClassifier(
                 artifact.getGroupId(), artifact.getArtifactId(), artifact.getVersion(), "jar", classifier);
 

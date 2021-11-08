@@ -16,7 +16,8 @@ import org.apache.maven.project.MavenProject;
 /**
  * Generates an aggregated attribution file for a (possibly) multi-module project.
  */
-@Mojo(name = "aggregate", defaultPhase = LifecyclePhase.PACKAGE, aggregator = true, requiresDependencyResolution = ResolutionScope.RUNTIME)
+@Mojo(name = "aggregate", defaultPhase = LifecyclePhase.PACKAGE, aggregator = true,
+    requiresDependencyResolution = ResolutionScope.RUNTIME)
 public class AggregatAttributionMojo extends AbstractAttributionMojo {
 
     @Override

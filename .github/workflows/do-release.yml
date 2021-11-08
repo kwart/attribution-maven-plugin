@@ -40,7 +40,7 @@ jobs:
         mvn clean install -B
         mvn deploy -B -Prelease -DskipTests
         mvn versions:set -B -DgenerateBackupPoms=false -DnewVersion=${{ github.event.inputs.next-snapshot-version }}
-        git commit -am "Next version is ${{ github.event.inputs.release-version }}"
+        git commit -am "Next version is ${{ github.event.inputs.next-snapshot-version }}"
         git push origin v${{ github.event.inputs.release-version }} main
       env:
         MAVEN_USERNAME: ${{ secrets.SONATYPE_OSS_USERNAME }}

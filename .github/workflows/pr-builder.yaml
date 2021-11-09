@@ -18,4 +18,6 @@ jobs:
           java-version: '8'
           distribution: 'adopt'
       - name: Maven, now you do the magic! I enchant you the Bash way!
-        run: mvn --batch-mode --update-snapshots verify
+        run: |
+          mvn --batch-mode --update-snapshots install
+          mvn --batch-mode -Prun-its verify

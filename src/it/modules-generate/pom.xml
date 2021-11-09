@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+
+<project
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+    xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.hazelcast.maven.it.modules-generate</groupId>
+    <artifactId>modules-generate</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+
+    <name>${project.artifactId}</name>
+
+    <modules>
+        <module>moduleA</module>
+        <module>moduleB</module>
+    </modules>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>com.hazelcast.maven</groupId>
+                <artifactId>attribution-maven-plugin</artifactId>
+                <version>@pom.version@</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

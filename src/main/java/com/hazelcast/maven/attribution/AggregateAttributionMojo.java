@@ -18,7 +18,7 @@ import org.apache.maven.project.MavenProject;
  */
 @Mojo(name = "aggregate", defaultPhase = LifecyclePhase.PACKAGE, aggregator = true,
     requiresDependencyResolution = ResolutionScope.RUNTIME)
-public class AggregatAttributionMojo extends AbstractAttributionMojo {
+public class AggregateAttributionMojo extends AbstractAttributionMojo {
 
     @Override
     protected Map<String, File> resolveSourceJars() {

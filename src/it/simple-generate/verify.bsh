@@ -1,0 +1,13 @@
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.io.File;
+
+File attributionFile = new File( basedir, "target/attribution.txt" );
+if ( !attributionFile.isFile()) {
+  return false;
+}
+lines = Files.readAllLines(attributionFile.toPath(), StandardCharsets.UTF_8);
+
+return lines.size() >= 2
+  && "org.slf4j:slf4j-api:1.7.32".equals(lines.get(0))
+  && "\tCopyright (c) 2004-2011 QOS.ch".equals(lines.get(1));

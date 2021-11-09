@@ -1,0 +1,11 @@
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.io.File;
+
+File attributionFileParent = new File( basedir, "target/attribution.txt" );
+File attributionFileModuleA = new File( basedir, "moduleA/target/attribution.txt" );
+File attributionFileModuleB = new File( basedir, "moduleB/target/attribution.txt" );
+
+return !attributionFileParent.exists()
+  && attributionFileModuleA.isFile()
+  && attributionFileModuleB.isFile();

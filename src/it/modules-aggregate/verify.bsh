@@ -1,0 +1,17 @@
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.io.File;
+
+File attributionFileParent = new File( basedir, "target/attribution.txt" );
+File attributionFileModuleA = new File( basedir, "moduleA/target/attribution.txt" );
+File attributionFileModuleB = new File( basedir, "moduleB/target/attribution.txt" );
+
+if (attributionFileModuleA.exists() || attributionFileModuleB.exists() || !attributionFileParent.isFile()) {
+  return false;
+}
+
+lines = Files.readAllLines(attributionFileParent.toPath(), StandardCharsets.UTF_8);
+
+return lines.size() >= 2
+  && "org.slf4j:slf4j-api:1.7.32".equals(lines.get(0))
+  && "\tCopyright (c) 2004-2011 QOS.ch".equals(lines.get(1));

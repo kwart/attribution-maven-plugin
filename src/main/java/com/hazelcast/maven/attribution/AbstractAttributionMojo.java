@@ -41,7 +41,6 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.DefaultProjectBuildingRequest;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.ProjectBuildingRequest;
-import org.apache.maven.shared.transfer.artifact.resolve.ArtifactResolverException;
 
 public abstract class AbstractAttributionMojo extends AbstractMojo {
 
@@ -332,7 +331,7 @@ public abstract class AbstractAttributionMojo extends AbstractMojo {
             resolvedArtifact = resolverComponent.getResolver().resolveArtifact(getProjectBuildingRequest(project), artifact)
                     .getArtifact();
             getLog().debug("Resolved source jar: " + resolvedArtifact.getFile());
-        } catch (ArtifactResolverException e1) {
+        } catch (Exception e1) {
             getLog().info("Resolving failed for " + artifact);
         }
         return resolvedArtifact == null ? null : resolvedArtifact.getFile();

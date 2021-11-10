@@ -11,6 +11,7 @@ jobs:
   release:
     name: Release on Sonatype OSS
     runs-on: ubuntu-latest
+    if: github.repository_owner == 'hazelcast'
 
     steps:
       - uses: actions/checkout@v2

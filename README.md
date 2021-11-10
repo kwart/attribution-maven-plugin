@@ -16,7 +16,7 @@ Both goals are thread safe and they share the following configuration.
 
 | Property name | User property | Default value | Description |
 |:-:|:-:|:-:|---|
-| `copyrightPattern` | `attribution.copyrightPattern` | `(?i)^([\s/*]*)(((\(c\))|(copyright))\s+\S[^;{}]*)$` | Customizes the pattern for finding the "attribution lines". |
+| `copyrightPattern` | `attribution.copyrightPattern` | `(?i)^([\s/*]*)(((\(c\))\|(copyright))\s+\S[^;{}]*)$` | Customizes the pattern for finding the "attribution lines". |
 | `copyrightPatternGroupIndex` | `attribution.copyrightPatternGroupIndex` |  | When a custom `copyrightPattern` is configured, then this parameter allows to specify which capture group is used. By default, the whole pattern is used (group==0) when the custom pattern is configured. Capture group 2 is used otherwise (i.e. for the default pattern). |
 | `exclusionPatterns` |   |   | Specifies list of copyright exclusion patterns. |
 | `exclusionPatternsFile` | `attribution.exclusionPatternsFile` |   | Parameter which can specify a file in which exclusion patterns are listed. File should be in `UTF-8` with a pattern per line. |

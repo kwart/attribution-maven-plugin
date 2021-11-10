@@ -10,7 +10,7 @@ The plugin contains 2 goals
 
 By default the resulting file is the `target/attribution.txt`.
 
-Both goals share the following configuration.
+Both goals are thread safe and they share the following configuration.
 
 ### Configuration properties
 
@@ -28,25 +28,23 @@ Both goals share the following configuration.
 ### The pom.xml
 
 ```xml
-<plugins>
-    <plugin>
-        <groupId>com.hazelcast.maven</groupId>
-        <artifactId>attribution-maven-plugin</artifactId>
-        <version>1.0-SNAPSHOT</version>
-        <executions>
-            <execution>
-                <id>attribution</id>
-                <goals>
-                    <goal>generate</goal>
-                </goals>
-            </execution>
-        </executions>
-    </plugin>
-</plugins>
+<plugin>
+    <groupId>com.hazelcast.maven</groupId>
+    <artifactId>attribution-maven-plugin</artifactId>
+    <version>${maven.attribution-maven-plugin}</version>
+    <executions>
+        <execution>
+            <id>attribution</id>
+            <goals>
+                <goal>generate</goal>
+            </goals>
+        </execution>
+    </executions>
+</plugin>
 ```
 
 ### The command-line
 
 ```bash
-mvn com.hazelcast.maven:attribution-maven-plugin:1.0-SNAPSHOT:aggregate
+mvn com.hazelcast.maven:attribution-maven-plugin:1.0:aggregate
 ```

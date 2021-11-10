@@ -13,7 +13,8 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
 /**
  * Generates the attribution file for a single project.
  */
-@Mojo(name = "generate", defaultPhase = LifecyclePhase.PACKAGE, requiresDependencyResolution = ResolutionScope.RUNTIME)
+@Mojo(name = "generate", defaultPhase = LifecyclePhase.PACKAGE,
+    requiresDependencyResolution = ResolutionScope.RUNTIME, threadSafe = true)
 public class GenerateAttributionMojo extends AbstractAttributionMojo {
 
     @Override

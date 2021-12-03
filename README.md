@@ -46,5 +46,5 @@ Both goals are thread safe and they share the following configuration.
 ### The command-line
 
 ```bash
-mvn com.hazelcast.maven:attribution-maven-plugin:1.0:aggregate
+mvn com.hazelcast.maven:attribution-maven-plugin:1.0.1:aggregate
 ```

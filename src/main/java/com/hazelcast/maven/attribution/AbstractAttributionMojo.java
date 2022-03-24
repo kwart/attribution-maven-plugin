@@ -236,6 +236,9 @@ public abstract class AbstractAttributionMojo extends AbstractMojo {
     protected abstract Map<String, File> resolveSourceJars();
 
     private void readJar(String gav, File jar, AttributionContext context) {
+        if (!jar.isFile()) {
+            getLog().info("Skipping the resolved source path as it's not a file: " + jar);
+        }
         try (ZipInputStream zip = new ZipInputStream(new BufferedInputStream(new FileInputStream(jar)))) {
             ZipEntry zipEntry;
             while (null != (zipEntry = zip.getNextEntry())) {

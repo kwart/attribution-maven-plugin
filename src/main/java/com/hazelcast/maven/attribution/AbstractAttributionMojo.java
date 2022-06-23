@@ -129,6 +129,7 @@ public abstract class AbstractAttributionMojo extends AbstractMojo {
     public void execute() throws MojoExecutionException, MojoFailureException {
         if (skip) {
             getLog().info("Skipping the plugin execution");
+            return;
         }
 
         if (outputFile == null) {
@@ -238,6 +239,7 @@ public abstract class AbstractAttributionMojo extends AbstractMojo {
     private void readJar(String gav, File jar, AttributionContext context) {
         if (!jar.isFile()) {
             getLog().info("Skipping the resolved source path as it's not a file: " + jar);
+            return;
         }
         try (ZipInputStream zip = new ZipInputStream(new BufferedInputStream(new FileInputStream(jar)))) {
             ZipEntry zipEntry;

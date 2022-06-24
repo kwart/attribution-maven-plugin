@@ -134,9 +134,10 @@ public abstract class AbstractAttributionMojo extends AbstractMojo {
             if (outputFile != null && !outputFile.exists()) {
                 try {
                     getLog().debug("Create the output attribution file even when the execution is skipped");
+                    ensureOutputFileParentDirCreated();
                     Files.createFile(outputFile.toPath());
                 } catch (IOException e) {
-                    getLog().info("Skipping the plugin execution");
+                    getLog().warn("Outputfile creation failed", e);
                 }
             }
             return;
@@ -216,10 +217,7 @@ public abstract class AbstractAttributionMojo extends AbstractMojo {
     }
 
     private void generateResults(final AttributionContext context) throws MojoExecutionException {
-        File parentDir = outputFile.getParentFile();
-        if (parentDir != null && !parentDir.exists()) {
-            parentDir.mkdirs();
-        }
+        ensureOutputFileParentDirCreated();
         try (PrintWriter pw = new PrintWriter(
                 new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(outputFile)), StandardCharsets.UTF_8))) {
             for (Map.Entry<String, Set<String>> gavEntry : context.foundAttribution.entrySet()) {
@@ -242,6 +240,13 @@ public abstract class AbstractAttributionMojo extends AbstractMojo {
             throw new MojoExecutionException("Unable to write to the outputFile " + outputFile, e);
         }
         getLog().info("Attribution file was generated: " + outputFile.getAbsolutePath());
+    }
+
+    private void ensureOutputFileParentDirCreated() {
+        File parentDir = outputFile.getParentFile();
+        if (parentDir != null && !parentDir.exists()) {
+            parentDir.mkdirs();
+        }
     }
 
     protected abstract Map<String, File> resolveSourceJars();

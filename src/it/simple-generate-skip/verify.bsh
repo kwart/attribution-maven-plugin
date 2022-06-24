@@ -1,0 +1,11 @@
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.io.File;
+
+File attributionFile = new File( basedir, "target/attribution.txt" );
+if ( !attributionFile.isFile()) {
+  return false;
+}
+lines = Files.readAllLines(attributionFile.toPath(), StandardCharsets.UTF_8);
+
+return lines.size() == 0;

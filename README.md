@@ -23,7 +23,7 @@ Both goals are thread safe and they share the following configuration.
 | `outputFile` | `attribution.outputFile` | `${project.build.directory}/attribution.txt` | Specifies the destination attribution file. |
 | `parallelism` | `attribution.parallelism` | *(#available-processors)* | Configures the parallelism level. By default the number of available processors is used. Parallelism says (1) how many new threads is used for reading source archives and also (2) how many new threads is used for search the copyright notices. |
 | `serviceTimeoutMinutes` | `attribution.serviceTimeoutMinutes` | `60` | Maximal wait time for finishing reading source JARs and searching for patterns in the found source files. |
-| `skip` | `attribution.skip` | `false` | Specifies whether the attribution file generation should be skipped. |
+| `skip` | `attribution.skip` | `false` | Specifies whether the plugin logic should be skipped. The plugin (since version 1.2) creates an empty `outputFile` if the execution is skipped. |
 
 ### The pom.xml
 
@@ -47,4 +47,11 @@ Both goals are thread safe and they share the following configuration.
 
 ```bash
 mvn com.hazelcast.maven:attribution-maven-plugin:1.0.1:aggregate
+```
+
+## Building project
+
+```bash
+mvn install
+mvn -Prun-its verify -DskipTests
 ```

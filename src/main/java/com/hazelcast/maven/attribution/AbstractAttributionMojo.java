@@ -15,6 +15,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -129,6 +130,15 @@ public abstract class AbstractAttributionMojo extends AbstractMojo {
     public void execute() throws MojoExecutionException, MojoFailureException {
         if (skip) {
             getLog().info("Skipping the plugin execution");
+            // try to create the output file even when the plugin execution is skipped
+            if (outputFile != null && !outputFile.exists()) {
+                try {
+                    getLog().debug("Create the output attribution file even when the execution is skipped");
+                    Files.createFile(outputFile.toPath());
+                } catch (IOException e) {
+                    getLog().info("Skipping the plugin execution");
+                }
+            }
             return;
         }
 

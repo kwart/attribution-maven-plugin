@@ -1,5 +1,18 @@
 package com.hazelcast.maven.attribution;
 
+import com.hazelcast.maven.attribution.resolver.AttribResourceResolver;
+import org.apache.commons.io.FileUtils;
+import org.apache.maven.artifact.Artifact;
+import org.apache.maven.execution.MavenSession;
+import org.apache.maven.plugin.AbstractMojo;
+import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.Component;
+import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.project.DefaultProjectBuildingRequest;
+import org.apache.maven.project.MavenProject;
+import org.apache.maven.project.ProjectBuildingRequest;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -29,19 +42,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
-
-import org.apache.commons.io.FileUtils;
-import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.DefaultArtifact;
-import org.apache.maven.execution.MavenSession;
-import org.apache.maven.plugin.AbstractMojo;
-import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.plugins.annotations.Component;
-import org.apache.maven.plugins.annotations.Parameter;
-import org.apache.maven.project.DefaultProjectBuildingRequest;
-import org.apache.maven.project.MavenProject;
-import org.apache.maven.project.ProjectBuildingRequest;
 
 public abstract class AbstractAttributionMojo extends AbstractMojo {
 
@@ -125,7 +125,7 @@ public abstract class AbstractAttributionMojo extends AbstractMojo {
     protected List<String> exclusionPatterns;
 
     @Component
-    private ResolverComponent resolverComponent;
+    protected AttribResourceResolver resourceResolver;
 
     public void execute() throws MojoExecutionException, MojoFailureException {
         if (skip) {
@@ -341,33 +341,8 @@ public abstract class AbstractAttributionMojo extends AbstractMojo {
         }
     }
 
-    protected File resolve(Artifact artifact) {
-        if (!SOURCES_CLASSIFIER.equals(artifact.getClassifier())) {
-            return null;
-        }
 
-        Artifact resolvedArtifact = null;
-        try {
-            resolvedArtifact = resolverComponent.getResolver().resolveArtifact(getProjectBuildingRequest(project), artifact)
-                    .getArtifact();
-            getLog().debug("Resolved source jar: " + resolvedArtifact.getFile());
-        } catch (Exception e1) {
-            getLog().info("Resolving failed for " + artifact);
-        }
-        return resolvedArtifact == null ? null : resolvedArtifact.getFile();
-    }
-
-    protected Artifact createResourceArtifact(final Artifact artifact, final String classifier) {
-        @SuppressWarnings("deprecation")
-        final DefaultArtifact a = (DefaultArtifact) resolverComponent.getArtifactFactory().createArtifactWithClassifier(
-                artifact.getGroupId(), artifact.getArtifactId(), artifact.getVersion(), "jar", classifier);
-
-        a.setRepository(artifact.getRepository());
-
-        return a;
-    }
-
-    private ProjectBuildingRequest getProjectBuildingRequest(MavenProject currentProject) {
+    protected ProjectBuildingRequest getProjectBuildingRequest(MavenProject currentProject) {
         return new DefaultProjectBuildingRequest(session.getProjectBuildingRequest())
                 .setRemoteRepositories(currentProject.getRemoteArtifactRepositories());
     }

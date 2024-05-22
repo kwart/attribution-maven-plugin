@@ -12,6 +12,7 @@ import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
+import org.apache.maven.project.ProjectBuildingRequest;
 
 /**
  * Generates an aggregated attribution file for a (possibly) multi-module project.
@@ -40,6 +41,7 @@ public class AggregateAttributionMojo extends AbstractAttributionMojo {
         getLog().debug("Project GAs: " + projectGaSet);
         getLog().debug("Artifacts size: " + artifacts.size());
 
+        ProjectBuildingRequest pbr = getProjectBuildingRequest(project);
         Map<String, File> result = new HashMap<String, File>();
         for (Artifact artifact : artifacts) {
             String gaKey = gaKey(artifact);
@@ -49,7 +51,7 @@ public class AggregateAttributionMojo extends AbstractAttributionMojo {
                 continue;
             }
             String gavKey = gavKey(artifact);
-            File sourceFile = resolve(createResourceArtifact(artifact, SOURCES_CLASSIFIER));
+            File sourceFile = resourceResolver.resolveSourceFromArtifact(pbr, project, artifact);
             if (sourceFile == null) {
                 getLog().debug("No source file resolved for " + gavKey);
                 continue;

@@ -9,6 +9,7 @@ import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.ResolutionScope;
+import org.apache.maven.project.ProjectBuildingRequest;
 
 /**
  * Generates the attribution file for a single project.
@@ -21,9 +22,10 @@ public class GenerateAttributionMojo extends AbstractAttributionMojo {
     protected Map<String, File> resolveSourceJars() {
         Map<String, File> result = new HashMap<>();
         List<Artifact> artifacts = project.getRuntimeArtifacts();
+        ProjectBuildingRequest pbr = getProjectBuildingRequest(project);
         for (Artifact artifact : artifacts) {
             String gavKey = gavKey(artifact);
-            File sourceFile = resolve(createResourceArtifact(artifact, SOURCES_CLASSIFIER));
+            File sourceFile = resourceResolver.resolveSourceFromArtifact(pbr, project, artifact);
             if (sourceFile == null) {
                 getLog().debug("No source file resolved for " + gavKey);
                 continue;

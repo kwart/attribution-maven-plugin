@@ -48,6 +48,7 @@ public final class AttribResourceResolver extends AbstractLogEnabled {
 
     @Inject
     private RepositorySystem repoSystem;
+
     public File resolveSourceFromArtifact(ProjectBuildingRequest projectBuildingRequest, MavenProject project, Artifact a) {
         org.eclipse.aether.artifact.Artifact artifact = new org.eclipse.aether.artifact.DefaultArtifact(a.getGroupId(),
                 a.getArtifactId(), SOURCES_CLASSIFIER, "jar", a.getVersion());

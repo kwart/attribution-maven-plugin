@@ -25,40 +25,46 @@ public class AggregateAttributionMojo extends AbstractAttributionMojo {
     protected Map<String, File> resolveSourceJars() {
         Set<String> projectGaSet = new HashSet<>();
 
-        Set<Artifact> artifacts = new HashSet<>();
-        final Map<String, MavenProject> projectMap = new HashMap<>();
+        Set<String> artifacts = new HashSet<>();
+        Map<String, File> result = new HashMap<String, File>();
         if (reactorProjects != null) {
             for (final MavenProject p : reactorProjects) {
                 String projectGaKey = gaKey(p.getGroupId(), p.getArtifactId());
                 projectGaSet.add(projectGaKey);
-                List<Artifact> projectArtifacts = p.getRuntimeArtifacts();
-                artifacts.addAll(projectArtifacts);
-                getLog().debug("Project " + projectGaKey + " artifacts: " + projectArtifacts);
+            }
+            for (final MavenProject p : reactorProjects) {
+//                List<Artifact> projectArtifacts = p.getRuntimeArtifacts();
+//                getLog().debug("Project " + gaKey(p.getGroupId(), p.getArtifactId()) + " artifacts: " + projectArtifacts);
+//
+//                ProjectBuildingRequest pbr = getProjectBuildingRequest(p);
+//                for (Artifact artifact : projectArtifacts) {
+//                    String gaKey = gaKey(artifact);
+//                    String gavKey = gavKey(artifact);
+//                    if (artifacts.contains(gavKey)) {
+//                        getLog().debug("Artifact already resolved " + gavKey);
+//                        continue;
+//                    }
+//                    artifacts.add(gavKey);
+//                    if (projectGaSet.contains(gaKey)) {
+//                        // don't include (sub)project sources
+//                        getLog().debug("Skipping (sub)project artifact " + gaKey);
+//                        continue;
+//                    }
+//                    File sourceFile = resourceResolver.resolveSourceFromArtifact(pbr, p, artifact);
+//                    if (sourceFile == null) {
+//                        getLog().debug("No source file resolved for " + gavKey);
+//                        continue;
+//                    }
+//                    getLog().debug("Resolved " + sourceFile);
+//                    result.put(gavKey, sourceFile);
+//                }
+
             }
         } else {
             getLog().info("Null reactorProjects");
         }
         getLog().debug("Project GAs: " + projectGaSet);
         getLog().debug("Artifacts size: " + artifacts.size());
-
-        ProjectBuildingRequest pbr = getProjectBuildingRequest(project);
-        Map<String, File> result = new HashMap<String, File>();
-        for (Artifact artifact : artifacts) {
-            String gaKey = gaKey(artifact);
-            if (projectGaSet.contains(gaKey)) {
-                // don't include (sub)project sources
-                getLog().debug("Skipping (sub)project artifact " + gaKey);
-                continue;
-            }
-            String gavKey = gavKey(artifact);
-            File sourceFile = resourceResolver.resolveSourceFromArtifact(pbr, project, artifact);
-            if (sourceFile == null) {
-                getLog().debug("No source file resolved for " + gavKey);
-                continue;
-            }
-            getLog().debug("Resolved " + sourceFile);
-            result.put(gavKey, sourceFile);
-        }
         return result;
     }
 

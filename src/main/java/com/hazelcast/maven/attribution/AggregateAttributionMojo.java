@@ -18,24 +18,19 @@ import java.util.Set;
  * Generates an aggregated attribution file for a (possibly) multi-module project.
  */
 @Mojo(name = "aggregate", defaultPhase = LifecyclePhase.PROCESS_RESOURCES,
-        aggregator = true, requiresDependencyCollection = ResolutionScope.RUNTIME,
-        requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME,
+        aggregator = true, requiresDependencyCollection = ResolutionScope.COMPILE_PLUS_RUNTIME,
+        requiresDependencyResolution = ResolutionScope.NONE,
         threadSafe = true)
 public class AggregateAttributionMojo extends AbstractAttributionMojo {
 
     @Override
     protected Map<String, File> resolveSourceJars() {
-        Set<String> projectGaSet = new HashSet<>();
-
         Set<String> artifacts = new HashSet<>();
         Map<String, File> result = new HashMap<String, File>();
         if (reactorProjects != null) {
+            Set<String> projectGaSet = getReactorProjectGaSet();
             for (final MavenProject p : reactorProjects) {
-                String projectGaKey = gaKey(p.getGroupId(), p.getArtifactId());
-                projectGaSet.add(projectGaKey);
-            }
-            for (final MavenProject p : reactorProjects) {
-                List<Artifact> projectArtifacts = p.getRuntimeArtifacts();
+                List<Artifact> projectArtifacts = getRuntimeAndCompileScopedArtifacts(p);
                 getLog().debug("Project " + gaKey(p.getGroupId(), p.getArtifactId()) + " artifacts: " + projectArtifacts);
 
                 ProjectBuildingRequest pbr = getProjectBuildingRequest(p);
@@ -64,7 +59,6 @@ public class AggregateAttributionMojo extends AbstractAttributionMojo {
         } else {
             getLog().info("Null reactorProjects");
         }
-        getLog().debug("Project GAs: " + projectGaSet);
         getLog().debug("Artifacts size: " + artifacts.size());
         return result;
     }

@@ -29,7 +29,9 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -341,17 +343,46 @@ public abstract class AbstractAttributionMojo extends AbstractMojo {
         }
     }
 
+    protected Set<String> getReactorProjectGaSet() {
+        Set<String> gaSet = new HashSet<>();
+        if (reactorProjects != null) {
+            for (final MavenProject p : reactorProjects) {
+                String projectGaKey = gaKey(p.getGroupId(), p.getArtifactId());
+                gaSet.add(projectGaKey);
+            }
+        }
+        getLog().debug("Reactor GAs: " + gaSet);
+        return gaSet;
+    }
 
     protected ProjectBuildingRequest getProjectBuildingRequest(MavenProject currentProject) {
         return new DefaultProjectBuildingRequest(session.getProjectBuildingRequest())
                 .setRemoteRepositories(currentProject.getRemoteArtifactRepositories());
     }
 
+    protected List<Artifact> getRuntimeAndCompileScopedArtifacts(MavenProject p) {
+        Set<Artifact> artifacts = p.getArtifacts();
+        List<Artifact> list = new ArrayList<>(artifacts.size());
+        for (Artifact a : artifacts) {
+            if (Artifact.SCOPE_COMPILE.equals(a.getScope()) || Artifact.SCOPE_RUNTIME.equals(a.getScope())) {
+                list.add(a);
+            }
+        }
+        getLog().debug("Project " + gavKey(p.getArtifact()) + " artifacts: " + list);
+        return list;
+    }
+
     protected static String gaKey(Artifact artifact) {
+        if (artifact == null) {
+            return "[null GA]";
+        }
         return gaKey(artifact.getGroupId(), artifact.getArtifactId());
     }
 
     protected static String gavKey(Artifact artifact) {
+        if (artifact == null) {
+            return "[null GAV]";
+        }
         return gavKey(artifact.getGroupId(), artifact.getArtifactId(), artifact.getVersion());
     }
 
